@@ -15,6 +15,8 @@ export class MapService {
     public compRef: any;
     public component: any;
 
+    counter: number;
+
     init(selector) {
         this.baseMaps = {
             CartoDB: L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
@@ -43,6 +45,10 @@ export class MapService {
             if (this.compRef) this.compRef.destroy();
             const compFactory = this.resolver.resolveComponentFactory(this.component);
             this.compRef = compFactory.create(this.injector);
+
+            this.compRef.instance.param = 0;
+            setInterval(() => this.compRef.instance.param++, 1000);
+
             this.appRef.attachView(this.compRef.hostView);
             this.compRef.onDestroy(() => {
                 this.appRef.detachView(this.compRef.hostView);

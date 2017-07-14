@@ -3,7 +3,7 @@ import * as svc from '../services';
 
 @app.Component({
     selector: "popup",
-    template: `<section class="popup">Popup Component! :D</section>`
+    template: `<section class="popup">Popup Component! :D {{ param }}</section>`
 })
 export class PopupComponent {
 }
