@@ -2,13 +2,14 @@ const path = require('path');
 const webpack = require('webpack');
 const HappyPack = require('happypack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const liveReloadPlugin = require('webpack-livereload-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = function () {
   return {
     context: path.resolve(__dirname, 'src'),
     entry: {
-      main: path.resolve(__dirname, 'src/app/main.ts')
+      main: path.resolve(__dirname, 'src/app.ts')
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
@@ -16,6 +17,7 @@ module.exports = function () {
       filename: '[name].js'
     },
 
+    devtool: 'eval',
     cache: true,
     watchOptions: {
       poll: 250
@@ -36,6 +38,7 @@ module.exports = function () {
       ]
     },
     plugins: [
+      new liveReloadPlugin(),
       new HappyPack(
         { id: 'ts', threads: 2, loaders: ['ts-loader?happyPackMode=true'] },
         { id: 'js', threads: 2, loaders: ['babel-loader?presets[]=es2015&cacheDirectory=true'] }
