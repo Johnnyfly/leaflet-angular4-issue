@@ -1,6 +1,13 @@
 export { Http } from "@angular/http";
-export { Output } from "@angular/core";
-export { Component } from "@angular/core";
-export { Injectable } from "@angular/core";
-export { EventEmitter } from "@angular/core";
 export { Router, ActivatedRoute } from '@angular/router';
+export {
+    Output,
+    Component,
+    ComponentRef,
+    Injector,
+    ApplicationRef,
+    ComponentFactoryResolver,
+    Injectable,
+    EventEmitter,
+    NgZone
+} from "@angular/core";

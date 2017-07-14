@@ -30,6 +30,9 @@ imports.push(modules.RouterModule.forRoot(appRoutes));
     imports: imports,
     providers: providers,
     declarations: declarations,
+    entryComponents: [
+        components.PopupComponent
+    ],
     bootstrap: [components.AppComponent]
 })
 export class AppModule { }
