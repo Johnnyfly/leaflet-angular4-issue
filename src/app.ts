@@ -26,7 +26,44 @@ class AppComponent { }
 class PopupComponent { }
 
 // ###########################################
-// Leafler map service
+// $compile for Angular 4! :D
+// ###########################################
+@Injectable()
+class CustomCompileService {
+
+    private appRef: ApplicationRef;
+
+    constructor(
+        private injector: Injector,
+        private resolver: ComponentFactoryResolver
+    ) { }
+
+    configure(appRef) {
+        this.appRef = appRef;
+    }
+
+    compile(component, onAttach) {
+        // if (this.compRef) this.compRef.destroy(); // TODO: Return?
+        const compFactory = this.resolver.resolveComponentFactory(component);
+        let compRef = compFactory.create(this.injector);
+
+        if (onAttach)
+            onAttach(compRef);
+
+        this.appRef.attachView(compRef.hostView);
+        compRef.onDestroy(() => {
+            this.appRef.detachView(compRef.hostView);
+        });
+
+        let div = document.createElement('div');
+        div.appendChild(compRef.location.nativeElement);
+        return div;
+    }
+
+}
+
+// ###########################################
+// Leaflet map service
 // ###########################################
 @Injectable()
 class MapService {
@@ -34,16 +71,14 @@ class MapService {
     map: any;
     baseMaps: any;
     markersLayer: any;
+    appRef: ApplicationRef;
 
-    public injector: Injector;
-    public appRef: ApplicationRef;
-    public resolver: ComponentFactoryResolver;
-    public compRef: any;
-    public component: any;
+    constructor(private compileService: CustomCompileService) {
+        compileService.configure(this.appRef);
+    }
 
-    counter: number;
-
-    init(selector) {
+    init(selector, appRef: ApplicationRef) {
+        this.appRef = appRef;
         this.baseMaps = {
             CartoDB: L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
@@ -61,6 +96,8 @@ class MapService {
         this.markersLayer = new L.FeatureGroup(null);
         this.markersLayer.clearLayers();
         this.markersLayer.addTo(this.map);
+
+        this.compileService.configure(this.appRef);
     }
 
     addMarker() {
@@ -68,20 +105,9 @@ class MapService {
         m.bindTooltip('Angular 4 marker (PopupComponent)');
         m.bindPopup(null);
         m.on('click', (e) => {
-            if (this.compRef) this.compRef.destroy();
-            const compFactory = this.resolver.resolveComponentFactory(this.component);
-            this.compRef = compFactory.create(this.injector);
-
-            this.compRef.instance.param = 0;
-            setInterval(() => this.compRef.instance.param++, 1000);
-
-            this.appRef.attachView(this.compRef.hostView);
-            this.compRef.onDestroy(() => {
-                this.appRef.detachView(this.compRef.hostView);
-            });
-            let div = document.createElement('div');
-            div.appendChild(this.compRef.location.nativeElement);
-            m.setPopupContent(div);
+            m.setPopupContent(
+                this.compileService.compile(PopupComponent, (c) => { c.instance.param = 0; setInterval(() => c.instance.param++, 1000); })
+            );
         });
         this.markersLayer.addLayer(m);
         return m;
@@ -101,24 +127,17 @@ class MapService {
 class MapComponent {
 
     marker: any;
-    compRef: ComponentRef<PopupComponent>;
 
     constructor(
-        private mapService: MapService,
-        private injector: Injector,
         private appRef: ApplicationRef,
-        private resolver: ComponentFactoryResolver
+        private mapService: MapService
     ) { }
 
     ngOnInit() {
-        this.mapService.init('map');
-        this.mapService.component = PopupComponent;
-        this.mapService.appRef = this.appRef;
-        this.mapService.compRef = this.compRef;
-        this.mapService.injector = this.injector;
-        this.mapService.resolver = this.resolver;
+        this.mapService.init('map', this.appRef);
         this.marker = this.mapService.addMarker();
     }
+
 }
 
 // ###########################################
@@ -129,7 +148,8 @@ class MapComponent {
         BrowserModule
     ],
     providers: [
-        MapService
+        MapService,
+        CustomCompileService
     ],
     declarations: [
         AppComponent,
