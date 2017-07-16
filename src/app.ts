@@ -50,9 +50,7 @@ class CustomCompileService {
             onAttach(compRef);
 
         this.appRef.attachView(compRef.hostView);
-        compRef.onDestroy(() => {
-            this.appRef.detachView(compRef.hostView);
-        });
+        compRef.onDestroy(() => this.appRef.detachView(compRef.hostView));
 
         let div = document.createElement('div');
         div.appendChild(compRef.location.nativeElement);
