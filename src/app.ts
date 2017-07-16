@@ -43,7 +43,6 @@ class CustomCompileService {
     }
 
     compile(component, onAttach) {
-        // if (this.compRef) this.compRef.destroy(); // TODO: Return?
         const compFactory = this.resolver.resolveComponentFactory(component);
         let compRef = compFactory.create(this.injector);
 
